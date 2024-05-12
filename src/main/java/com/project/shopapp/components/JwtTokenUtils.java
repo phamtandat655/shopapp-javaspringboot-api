@@ -1,6 +1,8 @@
 package com.project.shopapp.components;
 
 import com.project.shopapp.exceptions.InvalidParamException;
+import com.project.shopapp.models.Token;
+import com.project.shopapp.repositories.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -27,6 +29,8 @@ public class JwtTokenUtils {
     private int expiration;
     @Value("${jwt.secretKey}")
     private String secretKey;
+
+    private final TokenRepository tokenRepository;
 
     public String generateToken(com.project.shopapp.models.User user) throws InvalidParamException {
         // properties => claims : là mã hóa các thuộc tính trong user\
@@ -94,6 +98,11 @@ public class JwtTokenUtils {
     // kiểm tra token còn hợp lệ ko
     public boolean validateToken(String token, UserDetails userDetails) {
         String phoneNumber = extractPhoneNumber(token);
+        Token exsistingToken = tokenRepository.findByToken(token);
+        //kiểm tra token có bị khóa không
+        if(exsistingToken == null || exsistingToken.isRevoked() == true) {
+            return false;
+        }
         return (phoneNumber.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 }

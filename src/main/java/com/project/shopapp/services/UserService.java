@@ -54,6 +54,7 @@ public class UserService implements IUserService {
              .dateOfBirth(userDTO.getDateOfBirth())
              .facebookAccountId(userDTO.getFacebookAccountId())
              .googleAccountId(userDTO.getGoogleAccountId())
+             .active(1L)
              .build();
 
         newUser.setRole(role);
@@ -82,6 +83,10 @@ public class UserService implements IUserService {
             if(!passwordEncoder.matches(password, existingUser.getPassword())) {
                 throw new BadCredentialsException("Wrond phonenumber or password !");
             }
+        }
+
+        if(existingUser.getActive() != null && existingUser.getActive() == 0) {
+            throw new PermissionDenyException("Your account is locked !");
         }
 
         // authenticate with java spring security

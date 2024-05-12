@@ -29,6 +29,8 @@ public class Token {
     private boolean revoked;
     private boolean expired;
 
+    private boolean isMobile;
+
     @ManyToOne()
     @JoinColumn(name = "user_id")
     private User user;

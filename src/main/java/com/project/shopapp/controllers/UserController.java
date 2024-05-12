@@ -9,7 +9,9 @@ import com.project.shopapp.responses.RegisterResponse;
 import com.project.shopapp.responses.UserResponse;
 import com.project.shopapp.services.UserService;
 import com.project.shopapp.components.LocalizationUtils;
+import com.project.shopapp.token.TokenService;
 import com.project.shopapp.utils.MessageKeys;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +27,9 @@ import java.util.List;
 @RequestMapping("/${api.prefix}/users")
 @RequiredArgsConstructor
 public class UserController {
-    @Autowired
     private final UserService userService;
     private final LocalizationUtils localizationUtils;
+    private final TokenService tokenService;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> createUser(@Valid @RequestBody UserDTO userDTO, BindingResult result) {
@@ -70,7 +72,8 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody UserLoginDTO userLoginDTO,
-            BindingResult result
+            BindingResult result,
+            HttpServletRequest request
     ) {
         try {
             if(result.hasErrors()) {
@@ -89,6 +92,11 @@ public class UserController {
             // trả về token trong response
             String token = userService.login(userLoginDTO.getPhoneNumber(), userLoginDTO.getPassword());
 
+            // để xem login từ thiết bị nào bằng cách xem User-Agent trong header
+            String userAgent = request.getHeader("User-Agent");
+            User user = userService.getUserDetailsFromToken(token);
+            tokenService.addToken(user, token, isMobileDevice(userAgent));
+
             return ResponseEntity.ok(LoginResponse.builder()
                     .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
                     .token(token)
@@ -100,6 +108,9 @@ public class UserController {
                     .build()
             );
         }
+    }
+    private boolean isMobileDevice(String userAgent) {
+        return userAgent.toLowerCase().contains("mobile");
     }
 
     @GetMapping("/details")
