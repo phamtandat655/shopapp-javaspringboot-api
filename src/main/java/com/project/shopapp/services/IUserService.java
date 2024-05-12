@@ -12,6 +12,7 @@ public interface IUserService {
     String login (String phoneNumber, String password) throws DataNotFoundException, Exception;
 
     User getUserDetailsFromToken(String token);
+    User getUserDetailsFromRefreshToken(String token);
 
     User updateUser(Long userId, UpdateUserDTO userUpadtedDTO) throws Exception;
 }

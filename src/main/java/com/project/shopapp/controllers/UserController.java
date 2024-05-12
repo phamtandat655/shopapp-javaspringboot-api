@@ -1,8 +1,10 @@
 package com.project.shopapp.controllers;
 
+import com.project.shopapp.dtos.RefreshTokenDTO;
 import com.project.shopapp.dtos.UpdateUserDTO;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.dtos.UserLoginDTO;
+import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
 import com.project.shopapp.responses.LoginResponse;
 import com.project.shopapp.responses.RegisterResponse;
@@ -94,12 +96,15 @@ public class UserController {
 
             // để xem login từ thiết bị nào bằng cách xem User-Agent trong header
             String userAgent = request.getHeader("User-Agent");
-            User user = userService.getUserDetailsFromToken(token);
-            tokenService.addToken(user, token, isMobileDevice(userAgent));
+            User userDetails = userService.getUserDetailsFromToken(token);
+            Token jwtToken = tokenService.addToken(userDetails, token, isMobileDevice(userAgent));
 
             return ResponseEntity.ok(LoginResponse.builder()
                     .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
-                    .token(token)
+                    .token(jwtToken.getToken())
+                    .refreshToken(jwtToken.getRefreshToken())
+                    .id(userDetails.getId())
+                    .username(userDetails.getUsername())
                     .build()
             );
         } catch (Exception e) {
@@ -112,6 +117,29 @@ public class UserController {
     private boolean isMobileDevice(String userAgent) {
         return userAgent.toLowerCase().contains("mobile");
     }
+
+    @PostMapping("/refreshToken")
+    public ResponseEntity<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenDTO refreshTokenDTO) {
+        try {
+            User userDetails = userService.getUserDetailsFromRefreshToken(refreshTokenDTO.getRefreshToken());
+            Token jwtToken = tokenService.refreshToken(refreshTokenDTO.getRefreshToken(), userDetails);
+
+            return ResponseEntity.ok(LoginResponse.builder()
+                    .message("Refresh token successfully !")
+                    .token(jwtToken.getToken())
+                    .refreshToken(jwtToken.getRefreshToken())
+                    .id(userDetails.getId())
+                    .username(userDetails.getUsername())
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    LoginResponse.builder()
+                            .message("Refresh token failed !")
+                            .build()
+            );
+        }
+    }
+
 
     @GetMapping("/details")
     public ResponseEntity<UserResponse> getUserDetails(@RequestHeader("Authorization") String token) {

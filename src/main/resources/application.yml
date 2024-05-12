@@ -35,4 +35,5 @@ api:
   prefix: api/v1
 jwt:
   expiration: 2592000 #30days = 30 * 24 * 60 * 60
+  expiration-refresh-token: 5184000 #60days = 60 * 24 * 60 * 60
   secretKey: qV2jrGSRPoVN2o3JbA4pcqa7gLcbWOnijOxZXbLfJhs= # được generate từ hàm generatedSecretKey() trong JwtTokenUtil

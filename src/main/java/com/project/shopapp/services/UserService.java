@@ -6,8 +6,10 @@ import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.PermissionDenyException;
 import com.project.shopapp.models.Role;
+import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
 import com.project.shopapp.repositories.RoleRepository;
+import com.project.shopapp.repositories.TokenRepository;
 import com.project.shopapp.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,7 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
-
+    private final TokenRepository tokenRepository;
     @Override
     public User createUser(UserDTO userDTO) throws Exception {
         String phoneNumber = userDTO.getPhoneNumber();
@@ -110,7 +112,11 @@ public class UserService implements IUserService {
                 .findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new DateTimeException("Could not find user with phone number " + phoneNumber));
     }
-
+    @Override
+    public User getUserDetailsFromRefreshToken(String refreshToken) {
+        Token exsistingRefreshToken = tokenRepository.findByRefreshToken(refreshToken);
+        return getUserDetailsFromToken(exsistingRefreshToken.getToken());
+    }
     @Override
     public User updateUser(Long userId, UpdateUserDTO userUpadtedDTO) throws Exception {
         User existingUser = userRepository.findById(userId)

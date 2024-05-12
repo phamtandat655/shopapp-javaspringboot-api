@@ -31,6 +31,12 @@ public class Token {
 
     private boolean isMobile;
 
+    @Column(name="refresh_token", nullable = false, length = 255)
+    private String refreshToken;
+
+    @Column(name="refresh_expiration")
+    private LocalDateTime refreshExpirationDate;
+
     @ManyToOne()
     @JoinColumn(name = "user_id")
     private User user;

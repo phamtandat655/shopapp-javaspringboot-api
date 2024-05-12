@@ -13,6 +13,15 @@ public class LoginResponse {
     @JsonProperty("message")
     private String message;
 
+    @JsonProperty("id")
+    private Long id;
+
+    @JsonProperty("user_name")
+    private String username;
+
     @JsonProperty("token")
     private String token;
+
+    @JsonProperty("refresh_token")
+    private String refreshToken;
 }
