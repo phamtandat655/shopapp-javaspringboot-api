@@ -26,7 +26,7 @@ public class SecurityConfig {
     // Trong trường hợp này, nó nhận số điện thoại của người dùng làm đầu vào và sử dụng UserRepository để tìm kiếm người dùng tương ứng.
     // Nếu không tìm thấy người dùng, nó sẽ ném một UsernameNotFoundException.
     @Bean
-    public UserDetailsService userDetaillsService() {
+    public UserDetailsService userDetailsService() {
         return phoneNumber -> userRepository
                     .findByPhoneNumber(phoneNumber)
                     .orElseThrow(() -> new UsernameNotFoundException("Cannot find user with phone number " + phoneNumber));
@@ -64,7 +64,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetaillsService());
+        authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
