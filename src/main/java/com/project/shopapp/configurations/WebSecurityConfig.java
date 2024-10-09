@@ -106,7 +106,12 @@ public class WebSecurityConfig {
 
                             .anyRequest().authenticated();
                 })
-                .csrf(AbstractHttpConfigurer::disable);
+                .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(
+                        e->e
+                                .accessDeniedHandler((request, response, accessDeniedException)->response.setStatus(403))
+                                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                );
         http.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {
             @Override
             public void customize(CorsConfigurer<HttpSecurity> httpSecurityCorsConfigurer) {
